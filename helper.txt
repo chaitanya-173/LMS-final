@@ -1,0 +1,95 @@
+handleRegisterUser() ek function hai jo signup form ke data (signUpFormData) ko registerService() ko pass karta hai. registerService() axiosInstance ka use karke backend ke /auth/register endpoint par POST request bhejta hai, jisme form data ke saath "role": "user" bhi manually add kiya jata hai. axiosInstance ek custom Axios setup hai jo base URL aur headers (jaise token) predefined rakhta hai. Backend mein, /auth/register route pe registerUser controller aata hai — wo data receive karta hai, check karta hai ki userName ya email pehle se exist na karein, phir password ko bcrypt se hash karta hai, aur MongoDB mein ek naya user save karta hai. Agar sab kuch sahi ho, toh backend ek JSON response return karta hai: { success: true, message: "User registered successfully!" }, jo frontend mein receive hota hai.
+
+
+
+[User fills form] 
+     ↓
+[AuthPage.jsx]
+  - Gets formData + handler from AuthContext
+  - Passes to <CommonForm />
+     ↓
+[CommonForm.jsx]
+  - Renders dynamic inputs via <FormControls />
+  - Submits form with handleSubmit() (e = submit event)
+     ↓
+[handleSubmit = handleLoginUser / handleRegisterUser]
+  - Prevents default submit
+  - Sends data to backend using Axios (via registerService/loginService)
+     ↓
+[Backend Response]
+  - Sets token in sessionStorage
+  - Updates global auth state (user + token)
+
+
+
+
+fetch("http://localhost:5000/auth/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer yourTokenHere"
+  },
+  body: JSON.stringify({ email, password }),
+})
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+  .catch((err) => console.error(err));
+
+axios.post("/auth/login", { email, password })
+  .then((res) => console.log(res.data))
+  .catch((err) => console.error(err));
+
+
+
+
+
+src/
+  pages/
+    instructor/
+      create-course/
+        CreateCourse.jsx          // Main page (tab navigation)
+  components/
+    instructor/
+      create-course/
+        tabs/
+          BasicInfoTab.jsx
+          CurriculumTab.jsx
+          SettingsTab.jsx
+        curriculum/
+          ChapterBuilder.jsx
+          ChapterItem.jsx
+          DirectLectureEditor.jsx
+          LectureCard.jsx
+          LectureExtrasPanel.jsx
+          ExistingLectureModal.jsx
+          forms/
+            NotesForm.jsx
+            AssignmentForm.jsx
+            QuizForm.jsx
+            CodeLinkForm.jsx
+
+src/
+├── pages/
+│   └── instructor/
+│       └── create-course/
+│           └── CreateCourse.jsx         ← (Main tab-based UI: Basic Info, Curriculum, Settings)
+├── components/
+│   └── instructor/
+│       └── create-course/
+│           ├── tabs/
+│           │   ├── BasicInfoTab.jsx
+│           │   ├── CurriculumTab.jsx
+│           │   └── SettingsTab.jsx
+│           ├── curriculum/
+│           │   ├── ChapterBuilder.jsx
+│           │   ├── ChapterItem.jsx
+│           │   ├── DirectLectureEditor.jsx
+│           │   ├── LectureCard.jsx
+│           │   ├── LectureExtrasPanel.jsx
+│           │   └── forms/
+│           │       ├── NotesForm.jsx
+│           │       ├── AssignmentForm.jsx
+│           │       ├── QuizForm.jsx
+│           │       └── CodeLinkForm.jsx
+
+          

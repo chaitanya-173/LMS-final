@@ -1,0 +1,20 @@
+.shine-hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-25deg);
+}
+
+.shine-hover:hover::before {
+  left: 125%;
+  transition: left 0.7s ease-in-out;
+}
