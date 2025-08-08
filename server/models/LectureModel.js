@@ -66,8 +66,8 @@ const LectureSchema = new mongoose.Schema(
     },
 
     thumbnail: {
-      url: { type: String, required: true },
-      publicId: { type: String, required: true }, // For thumbnail on Bunny
+      url: { type: String },
+      publicId: { type: String }, // For thumbnail on Bunny
     },
     
     codeLink: String,

@@ -23,8 +23,7 @@ const createLecture = async (req, res) => {
 
     // Video & thumbnail object validation
     if (
-      !video || !video.url || !video.publicId ||
-      !thumbnail || !thumbnail.url || !thumbnail.publicId
+      !video || !video.url || !video.publicId
     ) {
       return res.status(400).json({
         message: "Video and thumbnail with url and publicId are required",
