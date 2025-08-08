@@ -14,6 +14,7 @@ const myCoursesRoutes = require("./routes/student-routes/my-course-routes");
 const studentCourseDetailsRoutes = require("./routes/student-routes/course-details-routes");
 const allCoursesRoutes = require("./routes/student-routes/all-course-routes");
 const progressRoutes = require("./routes/student-routes/progress-routes"); 
+const utilsRoutes = require('./routes/utils-routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,7 +30,7 @@ mongoose
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -49,6 +50,7 @@ app.use("/api/student", assignmentRoutes);
 app.use("/api/student", myCoursesRoutes);
 app.use("/api/student", studentCourseDetailsRoutes);
 app.use("/api/student/progress", progressRoutes);
+app.use('/api/utils', utilsRoutes);
 
 // error handling middleware
 app.use((err, req, res, next) => {

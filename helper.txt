@@ -43,30 +43,6 @@ axios.post("/auth/login", { email, password })
 
 
 
-src/
-  pages/
-    instructor/
-      create-course/
-        CreateCourse.jsx          // Main page (tab navigation)
-  components/
-    instructor/
-      create-course/
-        tabs/
-          BasicInfoTab.jsx
-          CurriculumTab.jsx
-          SettingsTab.jsx
-        curriculum/
-          ChapterBuilder.jsx
-          ChapterItem.jsx
-          DirectLectureEditor.jsx
-          LectureCard.jsx
-          LectureExtrasPanel.jsx
-          ExistingLectureModal.jsx
-          forms/
-            NotesForm.jsx
-            AssignmentForm.jsx
-            QuizForm.jsx
-            CodeLinkForm.jsx
 
 src/
 ├── pages/
@@ -75,6 +51,9 @@ src/
 │           └── CreateCourse.jsx         ← (Main tab-based UI: Basic Info, Curriculum, Settings)
 ├── components/
 │   └── instructor/
+│       ├── InstructorNavbar.jsx
+│       ├── InstructorSidebar.jsx
+│       ├── SidebarItem.jsx
 │       └── create-course/
 │           ├── tabs/
 │           │   ├── BasicInfoTab.jsx
@@ -86,10 +65,12 @@ src/
 │           │   ├── DirectLectureEditor.jsx
 │           │   ├── LectureCard.jsx
 │           │   ├── LectureExtrasPanel.jsx
+│           │   ├── ExistingLectureModal.jsx
 │           │   └── forms/
 │           │       ├── NotesForm.jsx
 │           │       ├── AssignmentForm.jsx
 │           │       ├── QuizForm.jsx
 │           │       └── CodeLinkForm.jsx
+
 
           

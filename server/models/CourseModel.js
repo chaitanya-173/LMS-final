@@ -6,7 +6,7 @@ const CourseSchema = new mongoose.Schema({
   instructorBio: String, // NEW: Optional instructor bio
 
   title: { type: String, required: true, unique: true },
-  description: { type: String, required: true },
+  description: { type: String },
   category: { type: String },
   tags: [String], // NEW: Hashtags for discoverability
   thumbnailUrl: { type: String },

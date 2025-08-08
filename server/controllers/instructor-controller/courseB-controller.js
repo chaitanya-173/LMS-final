@@ -3,53 +3,63 @@ const Course = require("../../models/CourseModel"); // Use correct path as per y
 
 const createCourse = async (req, res) => {
   try {
+    // Get instructorId from authenticated user instead of body
+    const instructorId = req.user?.userId || req.user?._id;
+    
     const {
-      instructorId,
-      instructorName,
-      instructorBio,     // ✅ New
       title,
+      slug,              // ✅ Add missing
+      shortDescription,  // ✅ Add missing  
       description,
       category,
-      tags,              // ✅ New
-      thumbnailUrl,
+      tags,
+      thumbnail,         // ✅ Object instead of thumbnailUrl
       pricing,
       originalPrice,
       discount,
-      level,             // ✅ New
-      language,          // ✅ New
-      validity,          // ✅ New
-      includes,          // ✅ New
+      level,
+      language,
+      validity,
+      includes,
       status,
       hasDirectLectures,
     } = req.body;
 
     const newCourse = new Course({
       instructorId,
-      instructorName,
-      instructorBio,     // ✅
+      instructorName: req.user?.userName,     // ✅ From auth user
+      instructorBio: req.user?.bio,          // ✅ From auth user
       title,
+      slug,              // ✅ Add
+      shortDescription,  // ✅ Add
       description,
       category,
-      tags,              // ✅
-      thumbnailUrl,
+      tags,
+      thumbnail,         // ✅ Object instead of thumbnailUrl
       pricing,
       originalPrice,
       discount,
-      level,             // ✅
-      language,          // ✅
-      validity,          // ✅
-      includes,          // ✅
-      status,
+      level,
+      language,
+      validity,
+      includes,
+      status: status || "draft",  // ✅ Default to draft
       hasDirectLectures,
-      // curriculum: will be empty initially
-      // students: will be empty initially
     });
 
     await newCourse.save();
-    res.status(201).json({ message: "Course created", course: newCourse });
+    res.status(201).json({ 
+      success: true,
+      message: "Course created successfully", 
+      course: newCourse 
+    });
   } catch (err) {
     console.error("Error creating course:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to create course",
+      error: err.message 
+    });
   }
 };
 

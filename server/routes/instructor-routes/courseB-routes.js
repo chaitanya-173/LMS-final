@@ -1,6 +1,7 @@
 // *NEW*
 const express = require("express");
 const router = express.Router();
+const authenticate = require("../../middlewares/auth-middleware");
 
 const {
   createCourse,
@@ -11,11 +12,11 @@ const {
   togglePublishStatus
 } = require("../../controllers/instructor-controller/courseB-controller");
 
-router.post("/", createCourse);  // create course
-router.get("/instructor/:instructorId", getCoursesByInstructor);  // get all courses by instructor
+router.post("/", authenticate, createCourse);  // create course
+router.get("/instructor/:instructorId", authenticate, getCoursesByInstructor);  // get all courses by instructor
 router.get("/:id", getCourseById);  // get single course by ID
-router.patch("/:id", updateCourse);  // update course
-router.delete("/:id", deleteCourse);  // delete course
-router.patch("/:id/status", togglePublishStatus);  // toggle publish status
+router.patch("/:id", authenticate, updateCourse);  // update course
+router.delete("/:id", authenticate, deleteCourse);  // delete course
+router.patch("/:id/status", authenticate, togglePublishStatus);  // toggle publish status
 
 module.exports = router;

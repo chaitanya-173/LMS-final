@@ -215,7 +215,7 @@ const getAllLecturesForInstructor = async (req, res) => {
     const instructorId = req.user?.userId;
     const lectures = await Lecture.find({ instructorId })
       .sort({ createdAt: -1 })
-      .select("title videoUrl thumbnailUrl notes quiz assignment codeLink createdAt");
+      .select("title video thumbnail notes quiz assignment codeLink createdAt");
 
     res.json({ success: true, lectures });
   } catch (error) {

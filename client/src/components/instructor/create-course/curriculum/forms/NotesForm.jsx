@@ -1,36 +1,32 @@
 import React, { useState } from "react";
-import axiosInstance from "@/api/axiosInstance";
 import { toast } from "react-hot-toast";
-import { FileUp } from "lucide-react";
+import { FileUp, FileText, X } from "lucide-react";
 
-const NotesForm = ({ lectureId, onSave }) => {
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+const NotesForm = ({ lectureId, onSave, existingData = null }) => {
+  const [file, setFile] = useState(existingData?.file || null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!file) {
       return toast.error("Please select a notes file");
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    // ✅ Pass data to parent component for local state management
+    const notesData = {
+      file: file,
+      fileName: file.name,
+      fileUrl: URL.createObjectURL(file), // Local preview URL
+    };
 
-    try {
-      setUploading(true);
-      const res = await axiosInstance.post(
-        `/api/instructor/notes/upload/${lectureId}`,
-        formData
-      );
+    onSave?.(notesData);
+    toast.success("Notes saved!");
+  };
 
-      toast.success("Notes uploaded successfully");
-      onSave?.();
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Upload failed");
-    } finally {
-      setUploading(false);
+  const removeFile = () => {
+    setFile(null);
+    if (document.getElementById("notes-file")) {
+      document.getElementById("notes-file").value = "";
     }
   };
 
@@ -42,35 +38,67 @@ const NotesForm = ({ lectureId, onSave }) => {
       {/* File Upload Box */}
       <div>
         <label className="block mb-1 font-medium flex items-center gap-2">
-          <FileUp size={18} /> Upload Notes (PDF)
+          <FileUp size={18} /> Upload Notes (PDF)*
         </label>
         <div
-          className="w-full h-32 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer bg-[#2a2826] hover:border-[#f35e33] transition"
-          onClick={() => document.getElementById("notes-file").click()}
+          className="w-full h-32 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer bg-[#2a2826] hover:border-[#f35e33] transition relative"
+          onClick={() => !file && document.getElementById("notes-file").click()}
         >
           {file ? (
-            <span className="text-sm">{file.name}</span>
+            <div className="flex flex-col items-center gap-2">
+              <FileText size={24} className="text-[#f35e33]" />
+              <span className="text-sm text-center">{file.name}</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFile();
+                }}
+                className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition"
+              >
+                <X size={14} />
+              </button>
+            </div>
           ) : (
-            <span className="text-gray-400 text-sm">Click to select file</span>
+            <span className="text-gray-400 text-sm">Click to select PDF file</span>
           )}
         </div>
         <input
           type="file"
           id="notes-file"
-          accept=".pdf,"
+          accept=".pdf"
           onChange={(e) => setFile(e.target.files[0])}
           className="hidden"
         />
+        {file && (
+          <button
+            type="button"
+            onClick={() => document.getElementById("notes-file").click()}
+            className="text-xs text-[#f35e33] hover:underline mt-1"
+          >
+            Change file
+          </button>
+        )}
       </div>
+
+      {/* File Info */}
+      {file && (
+        <div className="bg-[#2a2826] p-3 rounded-md">
+          <p className="text-xs text-gray-400">Selected file:</p>
+          <p className="text-sm font-medium">{file.name}</p>
+          <p className="text-xs text-gray-400">
+            Size: {(file.size / (1024 * 1024)).toFixed(2)} MB
+          </p>
+        </div>
+      )}
 
       {/* Submit Button */}
       <div className="pt-2">
         <button
           type="submit"
-          disabled={uploading}
-          className="bg-[#f35e33] hover:bg-[#e14e27] transition text-white px-4 py-2 rounded w-full"
+          className="bg-[#f35e33] hover:bg-[#e14e27] transition text-white px-4 py-2 rounded w-full font-medium"
         >
-          {uploading ? "Uploading..." : "Upload Notes"}
+          Save Notes
         </button>
       </div>
     </form>

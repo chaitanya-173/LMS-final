@@ -1,42 +1,42 @@
 import React, { useState } from "react";
-import axiosInstance from "@/api/axiosInstance";
 import { toast } from "react-hot-toast";
-import { CalendarDays, FileUp, FileText, Type } from "lucide-react";
+import { CalendarDays, FileUp, FileText, Type, X } from "lucide-react";
 
-const AssignmentForm = ({ lectureId, onSave }) => {
-  const [file, setFile] = useState(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [uploading, setUploading] = useState(false);
+const AssignmentForm = ({ lectureId, onSave, existingData = null }) => {
+  const [file, setFile] = useState(existingData?.file || null);
+  const [title, setTitle] = useState(existingData?.title || "");
+  const [description, setDescription] = useState(existingData?.description || "");
+  const [dueDate, setDueDate] = useState(existingData?.dueDate || "");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!title.trim()) {
+      return toast.error("Please enter assignment title");
+    }
 
     if (!file) {
       return toast.error("Please upload a file");
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("dueDate", dueDate);
+    // ✅ Pass data to parent component for local state management
+    const assignmentData = {
+      file: file,
+      title: title.trim(),
+      description: description.trim(),
+      dueDate: dueDate,
+      fileName: file.name,
+      fileUrl: file ? URL.createObjectURL(file) : null, // Local preview URL
+    };
 
-    try {
-      setUploading(true);
-      const res = await axiosInstance.post(
-        `/api/instructor/assignment/upload/${lectureId}`,
-        formData
-      );
+    onSave?.(assignmentData);
+    toast.success("Assignment details saved!");
+  };
 
-      toast.success("Assignment uploaded successfully");
-      onSave?.();
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Upload failed");
-    } finally {
-      setUploading(false);
+  const removeFile = () => {
+    setFile(null);
+    if (document.getElementById("assignment-file")) {
+      document.getElementById("assignment-file").value = "";
     }
   };
 
@@ -48,30 +48,44 @@ const AssignmentForm = ({ lectureId, onSave }) => {
       {/* Title */}
       <div>
         <label className="block mb-1 font-medium flex items-center gap-2">
-          <Type size={18} /> Assignment Title
+          <Type size={18} /> Assignment Title*
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter assignment title"
-          className="w-full p-2 bg-[#2a2826] rounded outline-none"
+          className="w-full p-2 bg-[#2a2826] rounded outline-none focus:ring-2 focus:ring-[#f35e33] transition"
+          required
         />
       </div>
 
       {/* File Upload Box */}
       <div>
         <label className="block mb-1 font-medium flex items-center gap-2">
-          <FileUp size={18} /> Upload File (PDF)
+          <FileUp size={18} /> Upload File (PDF)*
         </label>
         <div
-          className="w-full h-32 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer bg-[#2a2826] hover:border-[#f35e33] transition"
-          onClick={() => document.getElementById("assignment-file").click()}
+          className="w-full h-32 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer bg-[#2a2826] hover:border-[#f35e33] transition relative"
+          onClick={() => !file && document.getElementById("assignment-file").click()}
         >
           {file ? (
-            <span className="text-sm">{file.name}</span>
+            <div className="flex flex-col items-center gap-2">
+              <FileText size={24} className="text-[#f35e33]" />
+              <span className="text-sm text-center">{file.name}</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFile();
+                }}
+                className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition"
+              >
+                <X size={14} />
+              </button>
+            </div>
           ) : (
-            <span className="text-gray-400 text-sm">Click to select file</span>
+            <span className="text-gray-400 text-sm">Click to select PDF file</span>
           )}
         </div>
         <input
@@ -81,6 +95,15 @@ const AssignmentForm = ({ lectureId, onSave }) => {
           onChange={(e) => setFile(e.target.files[0])}
           className="hidden"
         />
+        {file && (
+          <button
+            type="button"
+            onClick={() => document.getElementById("assignment-file").click()}
+            className="text-xs text-[#f35e33] hover:underline mt-1"
+          >
+            Change file
+          </button>
+        )}
       </div>
 
       {/* Description */}
@@ -92,8 +115,8 @@ const AssignmentForm = ({ lectureId, onSave }) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          placeholder="Write a short description..."
-          className="w-full p-2 bg-[#2a2826] rounded resize-none outline-none"
+          placeholder="Write assignment instructions or description..."
+          className="w-full p-2 bg-[#2a2826] rounded resize-none outline-none focus:ring-2 focus:ring-[#f35e33] transition"
         />
       </div>
 
@@ -106,7 +129,8 @@ const AssignmentForm = ({ lectureId, onSave }) => {
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="w-full p-2 bg-[#2a2826] rounded outline-none"
+          className="w-full p-2 bg-[#2a2826] rounded outline-none focus:ring-2 focus:ring-[#f35e33] transition"
+          min={new Date().toISOString().split('T')[0]} // Prevent past dates
         />
       </div>
 
@@ -114,10 +138,9 @@ const AssignmentForm = ({ lectureId, onSave }) => {
       <div className="pt-2">
         <button
           type="submit"
-          disabled={uploading}
-          className="bg-[#f35e33] hover:bg-[#e14e27] transition text-white px-4 py-2 rounded w-full"
+          className="bg-[#f35e33] hover:bg-[#e14e27] transition text-white px-4 py-2 rounded w-full font-medium"
         >
-          {uploading ? "Uploading..." : "Upload Assignment"}
+          Save Assignment
         </button>
       </div>
     </form>
